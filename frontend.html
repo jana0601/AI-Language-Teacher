@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Teacher - AI Conversation Partner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: #2563EB;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: #2563EB;
+        }
+        
+        .message.ai .message-avatar {
+            background: #10B981;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .message.user .message-content {
+            background: #2563EB;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        
+        .message.ai .message-content {
+            background: white;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px;
+        }
+        
+        .message-time {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .analysis-card {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .analysis-card h4 {
+            color: #0c4a6e;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .score-item {
+            text-align: center;
+            background: white;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .score-item .label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 2px;
+        }
+        
+        .score-item .value {
+            font-weight: bold;
+            color: #2563EB;
+        }
+        
+        .feedback-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feedback-list li {
+            background: white;
+            padding: 8px 12px;
+            margin-bottom: 4px;
+            border-radius: 6px;
+            border-left: 3px solid #10B981;
+            font-size: 0.9rem;
+        }
+        
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            flex-shrink: 0;
+        }
+        
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+        
+        .chat-input {
+            flex: 1;
+            min-height: 44px;
+            max-height: 120px;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 22px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: #2563EB;
+        }
+        
+        .send-button {
+            width: 44px;
+            height: 44px;
+            background: #2563EB;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .send-button:hover {
+            background: #1d4ed8;
+        }
+        
+        .send-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border: 1px solid #e5e7eb;
+            max-width: 70%;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #6b7280;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-action {
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-action:hover {
+            background: #e5e7eb;
+        }
+        
+        .quick-action.active {
+            background: #2563EB;
+            color: white;
+            border-color: #2563EB;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            color: #6b7280;
+            padding: 40px 20px;
+        }
+        
+        .welcome-message h3 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+                margin: 0;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #2563EB;
+        }
+        
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            background: #2563EB;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563EB;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .results {
+            display: none;
+            margin-top: 20px;
+        }
+        
+        .score-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .overall-score {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #2563EB;
+            margin-bottom: 5px;
+        }
+        
+        .proficiency-level {
+            font-size: 1.5rem;
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+        
+        .score-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .score-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .score-item h4 {
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2563EB;
+        }
+        
+        .feedback-section {
+            margin-top: 20px;
+        }
+        
+        .feedback-section h3 {
+            color: #374151;
+            margin-bottom: 10px;
+        }
+        
+        .feedback-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feedback-list li {
+            background: white;
+            padding: 10px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border-left: 4px solid #2563EB;
+        }
+        
+        .strengths li {
+            border-left-color: #10B981;
+        }
+        
+        .improvements li {
+            border-left-color: #F59E0B;
+        }
+        
+        .recommendations li {
+            border-left-color: #8B5CF6;
+        }
+        
+        .error {
+            background: #FEE2E2;
+            color: #DC2626;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #DC2626;
+        }
+        
+        .success {
+            background: #D1FAE5;
+            color: #059669;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #059669;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💬 AI Language Teacher</h1>
+            <p>Practice English conversation with real-time analysis</p>
+            <div id="server-status" style="margin-top: 10px; font-size: 0.9em;">
+                <span id="status-indicator" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #6b7280; margin-right: 5px;"></span>
+                <span id="status-text">Checking server connection...</span>
+            </div>
+        </div>
+        
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <div class="welcome-message">
+                    <h3>👋 Welcome to your AI Language Teacher!</h3>
+                    <p>Start a conversation and I'll help you improve your English with real-time analysis.</p>
+                </div>
+            </div>
+            
+            <div class="chat-input-container">
+                <div class="quick-actions">
+                    <div class="quick-action" data-topic="General Discussion">General Chat</div>
+                    <div class="quick-action" data-topic="Job Interview">Job Interview</div>
+                    <div class="quick-action" data-topic="Travel">Travel</div>
+                    <div class="quick-action" data-topic="Food & Cooking">Food & Cooking</div>
+                    <div class="quick-action" data-topic="Technology">Technology</div>
+                    <div class="quick-action" data-topic="Education">Education</div>
+                    <div class="quick-action" id="test-mode-btn" style="background: #f59e0b; color: white;">Test Mode</div>
+                    <div class="quick-action" id="test-api-btn" style="background: #10b981; color: white;">Test API</div>
+                </div>
+                
+                <div class="chat-input-wrapper">
+                    <textarea 
+                        id="chat-input" 
+                        class="chat-input" 
+                        placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+                        rows="1"
+                    ></textarea>
+                    <button id="send-button" class="send-button" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+        
+        // Get elements
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendButton = document.getElementById('send-button');
+        const quickActions = document.querySelectorAll('.quick-action');
+        
+        let currentTopic = 'General Discussion';
+        let conversationHistory = [];
+        let testMode = false;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add intelligent welcome message from AI
+            const welcomeMessages = [
+                "👋 Hello! I'm your advanced AI Language Teacher. I'll analyze your English skills in real-time and provide personalized feedback to help you improve. What topic interests you today?",
+                "🎓 Welcome! I'm here to help you master English through intelligent conversation analysis. I'll evaluate your grammar, vocabulary, fluency, and more. What would you like to discuss?",
+                "💬 Hi there! I'm your AI English tutor. I provide detailed analysis of your language skills and adapt my teaching to your level. Ready to start practicing?",
+                "🌟 Greetings! I'm an advanced language teacher AI. I'll give you comprehensive feedback on your English and challenge you appropriately. What's on your mind today?"
+            ];
+            
+            const randomWelcome = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+            addAIMessage(randomWelcome);
+            
+            // Add helpful tips
+            setTimeout(() => {
+                addAIMessage("💡 <strong>Pro tip:</strong> Try different topics using the buttons above! I'll analyze your English and provide detailed scores for Grammar, Vocabulary, Fluency, Pronunciation, and Comprehension.");
+            }, 2000);
+            
+            // Test API connection
+            testAPIConnection();
+        });
+        
+        // Chat input handling
+        chatInput.addEventListener('input', () => {
+            sendButton.disabled = chatInput.value.trim() === '';
+            autoResizeTextarea();
+        });
+        
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        
+        sendButton.addEventListener('click', sendMessage);
+        
+        // Quick action buttons
+        quickActions.forEach(action => {
+            action.addEventListener('click', () => {
+                if (action.id === 'test-mode-btn') {
+                    testMode = !testMode;
+                    action.textContent = testMode ? 'Exit Test Mode' : 'Test Mode';
+                    action.style.background = testMode ? '#dc2626' : '#f59e0b';
+                    addAIMessage(testMode ? 
+                        "🧪 Test Mode: I'll respond without analysis. Try sending a message!" : 
+                        "✅ Analysis Mode: I'll analyze your messages again."
+                    );
+                    return;
+                }
+                
+                if (action.id === 'test-api-btn') {
+                    testAPIConnection();
+                    return;
+                }
+                
+                // Remove active class from all
+                quickActions.forEach(a => a.classList.remove('active'));
+                // Add active class to clicked
+                action.classList.add('active');
+                currentTopic = action.dataset.topic;
+                
+                // Add AI message about topic change
+                addAIMessage(`Great! Let's talk about ${currentTopic.toLowerCase()}. What would you like to discuss?`);
+            });
+        });
+        
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            console.log('Sending message:', message);
+            
+            // Add user message to chat
+            addUserMessage(message);
+            
+            // Clear input
+            chatInput.value = '';
+            sendButton.disabled = true;
+            autoResizeTextarea();
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                if (testMode) {
+                    // Test mode - skip analysis
+                    console.log('Test mode: skipping analysis');
+                    hideTypingIndicator();
+                    
+                    // Generate simple AI response
+                    const aiResponse = generateFallbackResponse(message, currentTopic);
+                    addAIMessage(aiResponse);
+                    
+                    // Store in conversation history
+                    conversationHistory.push({
+                        user: message,
+                        ai: aiResponse,
+                        analysis: null,
+                        topic: currentTopic,
+                        timestamp: new Date()
+                    });
+                } else {
+                    console.log('Analyzing message...');
+                    // Analyze the message
+                    const analysis = await analyzeMessage(message);
+                    console.log('Analysis result:', analysis);
+                    
+                    // Hide typing indicator
+                    hideTypingIndicator();
+                    
+                    // Add analysis results
+                    addAnalysisMessage(analysis);
+                    
+                    // Generate AI response
+                    console.log('Generating AI response...');
+                    const aiResponse = generateAIResponse(message, analysis, currentTopic);
+                    console.log('AI response:', aiResponse);
+                    addAIMessage(aiResponse);
+                    
+                    // Store in conversation history
+                    conversationHistory.push({
+                        user: message,
+                        ai: aiResponse,
+                        analysis: analysis,
+                        topic: currentTopic,
+                        timestamp: new Date()
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error in sendMessage:', error);
+                hideTypingIndicator();
+                
+                // Show detailed error information
+                addAIMessage(`⚠️ <strong>Analysis Error:</strong> ${error.message}`);
+                
+                // Try to provide a helpful response even if analysis fails
+                const fallbackResponse = generateFallbackResponse(message, currentTopic);
+                addAIMessage(fallbackResponse);
+                
+                // Add troubleshooting tips
+                addAIMessage("🔧 <strong>Troubleshooting:</strong> Try using Test Mode (orange button) or check if the server is running. The conversation can continue without analysis!");
+                
+                // Store in conversation history without analysis
+                conversationHistory.push({
+                    user: message,
+                    ai: fallbackResponse,
+                    analysis: null,
+                    topic: currentTopic,
+                    timestamp: new Date(),
+                    error: error.message
+                });
+            }
+        }
+        
+        async function analyzeMessage(message) {
+            console.log('Creating form data for:', message, 'topic:', currentTopic);
+            const formData = new FormData();
+            formData.append('transcript', message);
+            formData.append('context', currentTopic);
+            formData.append('audio_duration', '30');
+            
+            console.log('Sending request to:', `${API_BASE_URL}/api/test/analyze`);
+            
+            // Add timeout and retry logic
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/test/analyze`, {
+                    method: 'POST',
+                    body: formData,
+                    signal: controller.signal,
+                    mode: 'cors',
+                    credentials: 'omit'
+                });
+                
+                clearTimeout(timeoutId);
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API Error:', errorText);
+                    throw new Error(`Server Error: ${response.status} - ${errorText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Analysis completed successfully');
+                return result;
+                
+            } catch (error) {
+                clearTimeout(timeoutId);
+                console.error('Fetch error details:', error);
+                if (error.name === 'AbortError') {
+                    throw new Error('Analysis timed out - server may be overloaded');
+                } else if (error.message.includes('Failed to fetch')) {
+                    throw new Error('Cannot connect to server - please check if the backend is running');
+                } else {
+                    throw error;
+                }
+            }
+        }
+        
+        function generateAIResponse(userMessage, analysis, topic) {
+            // Generate intelligent responses based on analysis and message content
+            const proficiencyLevel = analysis.proficiency_level;
+            const overallScore = analysis.overall_score;
+            const grammarScore = analysis.grammar_score;
+            const vocabularyScore = analysis.vocabulary_score;
+            
+            // Analyze the user's message for content
+            const messageLength = userMessage.split(' ').length;
+            const hasQuestions = userMessage.includes('?');
+            const hasComplexWords = vocabularyScore > 15;
+            
+            // Generate contextual responses based on proficiency and content
+            let response = "";
+            
+            if (proficiencyLevel === 'A1' || proficiencyLevel === 'A2') {
+                // Beginner level - encourage and provide simple feedback
+                response = generateBeginnerResponse(userMessage, analysis, topic);
+            } else if (proficiencyLevel === 'B1' || proficiencyLevel === 'B2') {
+                // Intermediate level - challenge and provide detailed feedback
+                response = generateIntermediateResponse(userMessage, analysis, topic);
+            } else {
+                // Advanced level - engage in complex discussion
+                response = generateAdvancedResponse(userMessage, analysis, topic);
+            }
+            
+            return response;
+        }
+        
+        function generateBeginnerResponse(message, analysis, topic) {
+            const responses = [
+                `Great effort! I can see you're working hard on your English. Your ${analysis.strengths[0] || 'communication'} is good. Let's practice more - can you tell me about your favorite ${topic.toLowerCase()}?`,
+                `Well done! You're making progress. I noticed you used some good vocabulary. What do you think about ${topic.toLowerCase()}? Try to use complete sentences.`,
+                `Good job! Your English is improving. To help you get better, try to speak more about ${topic.toLowerCase()}. What's your experience with it?`,
+                `Excellent! You're learning well. Let's continue practicing. Can you describe your ideal ${topic.toLowerCase()} in more detail?`,
+                `Nice work! I can see your confidence growing. Tell me more about ${topic.toLowerCase()} - what makes it interesting to you?`
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        function generateIntermediateResponse(message, analysis, topic) {
+            const responses = [
+                `That's a thoughtful response! Your ${analysis.strengths[0] || 'expression'} shows good progress. However, I'd suggest working on ${analysis.areas_for_improvement[0] || 'your fluency'}. What's your perspective on the future of ${topic.toLowerCase()}?`,
+                `Interesting point! You're expressing yourself well. I noticed your ${analysis.strengths[0] || 'vocabulary'} is strong. Let's discuss: How do you think ${topic.toLowerCase()} has changed over the years?`,
+                `Good analysis! Your English is quite good. To reach the next level, focus on ${analysis.areas_for_improvement[0] || 'more complex structures'}. What challenges do you see in ${topic.toLowerCase()}?`,
+                `Well articulated! You're showing good command of English. I'd recommend practicing ${analysis.areas_for_improvement[0] || 'more advanced expressions'}. What's your take on current trends in ${topic.toLowerCase()}?`,
+                `Excellent communication! Your ${analysis.strengths[0] || 'clarity'} is impressive. Let's explore deeper: What role do you think ${topic.toLowerCase()} plays in society today?`
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        function generateAdvancedResponse(message, analysis, topic) {
+            const responses = [
+                `Sophisticated response! Your ${analysis.strengths[0] || 'articulation'} demonstrates advanced English skills. Let's delve deeper: What are the broader implications of current developments in ${topic.toLowerCase()}?`,
+                `Excellent analysis! You're expressing complex ideas clearly. Your ${analysis.strengths[0] || 'fluency'} is impressive. What's your view on the ethical considerations surrounding ${topic.toLowerCase()}?`,
+                `Outstanding communication! Your command of English is excellent. Let's explore: How do you see ${topic.toLowerCase()} evolving in the next decade, and what factors will drive this change?`,
+                `Brilliant perspective! You're demonstrating advanced language skills. What's your assessment of the current challenges and opportunities in ${topic.toLowerCase()}?`,
+                `Exceptional articulation! Your English is at a very high level. Let's discuss: What innovative approaches do you think could revolutionize ${topic.toLowerCase()}?`
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+        
+        function generateFallbackResponse(userMessage, topic) {
+            const fallbackResponses = [
+                "That's interesting! Tell me more about that.",
+                "I see what you mean. What do you think about that?",
+                "That's a great point. How do you feel about it?",
+                "Interesting! Can you elaborate on that?",
+                "I understand. What's your experience with this topic?",
+                "That sounds fascinating! Tell me more.",
+                "Good point! What made you think of that?",
+                "I'd love to hear more about your perspective on this."
+            ];
+            
+            return fallbackResponses[Math.floor(Math.random() * fallbackResponses.length)];
+        }
+        
+        function addUserMessage(message) {
+            const messageDiv = createMessageElement('user', message);
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        function addAIMessage(message) {
+            const messageDiv = createMessageElement('ai', message);
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        function addAnalysisMessage(analysis) {
+            const analysisDiv = document.createElement('div');
+            analysisDiv.className = 'message ai';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '📊';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            const analysisCard = document.createElement('div');
+            analysisCard.className = 'analysis-card';
+            
+            // Calculate progress percentage
+            const progressPercentage = Math.min((analysis.overall_score / 100) * 100, 100);
+            const levelDescription = getLevelDescription(analysis.proficiency_level);
+            
+            analysisCard.innerHTML = `
+                <h4>📈 Detailed Language Analysis</h4>
+                
+                <div style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                        <strong>Overall Performance</strong>
+                        <span style="font-size: 1.2em; font-weight: bold; color: #2563EB;">${analysis.overall_score.toFixed(1)}/100</span>
+                    </div>
+                    <div style="background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #10B981, #2563EB); height: 100%; width: ${progressPercentage}%; transition: width 0.5s ease;"></div>
+                    </div>
+                    <div style="margin-top: 5px; font-size: 0.9em; color: #6b7280;">
+                        <strong>CEFR Level:</strong> ${analysis.proficiency_level} - ${levelDescription}
+                    </div>
+                </div>
+                
+                <div class="score-grid" style="margin-bottom: 15px;">
+                    <div class="score-item">
+                        <div class="label">Grammar</div>
+                        <div class="value">${analysis.grammar_score.toFixed(1)}/25</div>
+                        <div style="font-size: 0.7em; color: ${analysis.grammar_score >= 20 ? '#10B981' : analysis.grammar_score >= 15 ? '#F59E0B' : '#EF4444'};">
+                            ${getScoreRating(analysis.grammar_score, 25)}
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Vocabulary</div>
+                        <div class="value">${analysis.vocabulary_score.toFixed(1)}/20</div>
+                        <div style="font-size: 0.7em; color: ${analysis.vocabulary_score >= 16 ? '#10B981' : analysis.vocabulary_score >= 12 ? '#F59E0B' : '#EF4444'};">
+                            ${getScoreRating(analysis.vocabulary_score, 20)}
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Fluency</div>
+                        <div class="value">${analysis.fluency_score.toFixed(1)}/20</div>
+                        <div style="font-size: 0.7em; color: ${analysis.fluency_score >= 16 ? '#10B981' : analysis.fluency_score >= 12 ? '#F59E0B' : '#EF4444'};">
+                            ${getScoreRating(analysis.fluency_score, 20)}
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Pronunciation</div>
+                        <div class="value">${analysis.pronunciation_score.toFixed(1)}/15</div>
+                        <div style="font-size: 0.7em; color: ${analysis.pronunciation_score >= 12 ? '#10B981' : analysis.pronunciation_score >= 9 ? '#F59E0B' : '#EF4444'};">
+                            ${getScoreRating(analysis.pronunciation_score, 15)}
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <div class="label">Comprehension</div>
+                        <div class="value">${analysis.comprehension_score.toFixed(1)}/20</div>
+                        <div style="font-size: 0.7em; color: ${analysis.comprehension_score >= 16 ? '#10B981' : analysis.comprehension_score >= 12 ? '#F59E0B' : '#EF4444'};">
+                            ${getScoreRating(analysis.comprehension_score, 20)}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 10px;">
+                    <div style="background: #D1FAE5; padding: 8px; border-radius: 6px; margin-bottom: 8px;">
+                        <strong style="color: #059669;">✅ Strengths:</strong><br>
+                        ${analysis.strengths.map(s => `• ${s}`).join('<br>')}
+                    </div>
+                    <div style="background: #FEF3C7; padding: 8px; border-radius: 6px;">
+                        <strong style="color: #D97706;">🎯 Areas to Improve:</strong><br>
+                        ${analysis.areas_for_improvement.map(a => `• ${a}`).join('<br>')}
+                    </div>
+                </div>
+                
+                <div style="background: #E0E7FF; padding: 8px; border-radius: 6px;">
+                    <strong style="color: #3730A3;">💡 Recommendations:</strong><br>
+                    ${analysis.recommendations.map(r => `• ${r}`).join('<br>')}
+                </div>
+            `;
+            
+            content.appendChild(analysisCard);
+            analysisDiv.appendChild(avatar);
+            analysisDiv.appendChild(content);
+            
+            chatMessages.appendChild(analysisDiv);
+            scrollToBottom();
+        }
+        
+        function getLevelDescription(level) {
+            const descriptions = {
+                'A1': 'Beginner - Can understand and use familiar expressions',
+                'A2': 'Elementary - Can communicate in simple situations',
+                'B1': 'Intermediate - Can handle most situations when traveling',
+                'B2': 'Upper-Intermediate - Can interact with native speakers fluently',
+                'C1': 'Advanced - Can use language flexibly and effectively',
+                'C2': 'Proficient - Can understand virtually everything with ease'
+            };
+            return descriptions[level] || 'Unknown level';
+        }
+        
+        function getScoreRating(score, max) {
+            const percentage = (score / max) * 100;
+            if (percentage >= 80) return 'Excellent';
+            if (percentage >= 60) return 'Good';
+            if (percentage >= 40) return 'Fair';
+            return 'Needs Work';
+        }
+        
+        function createMessageElement(type, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? '👤' : '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.innerHTML = message; // Use innerHTML to support HTML formatting
+            
+            const time = document.createElement('div');
+            time.className = 'message-time';
+            time.textContent = new Date().toLocaleTimeString();
+            
+            content.appendChild(time);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            
+            return messageDiv;
+        }
+        
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai typing-indicator';
+            typingDiv.style.display = 'flex';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            
+            const dots = document.createElement('div');
+            dots.className = 'typing-dots';
+            dots.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            
+            content.appendChild(dots);
+            typingDiv.appendChild(avatar);
+            typingDiv.appendChild(content);
+            
+            chatMessages.appendChild(typingDiv);
+            scrollToBottom();
+        }
+        
+        function hideTypingIndicator() {
+            const typingIndicator = chatMessages.querySelector('.typing-indicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+        
+        function autoResizeTextarea() {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 120) + 'px';
+        }
+        
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        async function testAPIConnection() {
+            const statusIndicator = document.getElementById('status-indicator');
+            const statusText = document.getElementById('status-text');
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('API connection successful');
+                    statusIndicator.style.background = '#10B981';
+                    statusText.textContent = `Server connected - ${data.analysis_model} analysis available (${data.model})`;
+                } else {
+                    console.log('API connection failed');
+                    statusIndicator.style.background = '#F59E0B';
+                    statusText.textContent = 'Server error - Analysis may fail';
+                }
+            } catch (error) {
+                console.log('API not available');
+                statusIndicator.style.background = '#EF4444';
+                statusText.textContent = 'Server offline - Use Test Mode';
+            }
+        }
+        
+        // Check server status every 30 seconds
+        setInterval(testAPIConnection, 30000);
+    </script>
+</body>
+</html>
