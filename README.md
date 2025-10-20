@@ -2,10 +2,20 @@
 
 A comprehensive language learning application that evaluates language proficiency through conversation analysis.
 
+## Application Interface
+
+![Language Teacher Interface](interface.jpg)
+
+*Interactive conversation-style interface with real-time AI analysis and feedback*
+
 ## Features
 
-- **Real-time Conversation Analysis**: AI-powered evaluation of grammar, vocabulary, fluency, pronunciation, and comprehension
+- **LLM-Based Evaluation**: Intelligent analysis using LLaMA model for context-aware assessment
+- **Real-time Conversation Analysis**: AI-powered evaluation of grammar, vocabulary, fluency, and comprehension
 - **Multi-level Assessment**: Support for A1-C2 proficiency levels (CEFR)
+- **Interactive AI Teacher**: Adaptive responses based on user proficiency level
+- **Conversation-Style Interface**: Modern chat-based UI with real-time feedback
+- **Comprehensive Scoring**: Detailed analysis with strengths, improvements, and recommendations
 - **Progress Tracking**: Detailed analytics and progress visualization
 - **Teacher Dashboard**: Comprehensive student monitoring and assignment management
 - **Audio/Video Recording**: High-quality conversation recording with real-time feedback
@@ -15,23 +25,22 @@ A comprehensive language learning application that evaluates language proficienc
 
 ### Backend
 - **Framework**: FastAPI (Python 3.9+)
-- **Database**: PostgreSQL 14+ with Redis caching
-- **AI/ML**: OpenAI GPT-4, Whisper, custom analysis services
+- **AI/ML**: LLaMA (microsoft/DialoGPT-medium), OpenAI GPT-4 integration
+- **NLP**: spaCy, NLTK, TextBlob
+- **Database**: SQLAlchemy ORM with PostgreSQL support
 - **Authentication**: JWT with OAuth2
-- **File Storage**: AWS S3 or similar
+- **Analysis**: LLM-based evaluation system
 
 ### Frontend
-- **Framework**: React 18 with TypeScript
-- **UI Library**: Material-UI (MUI)
-- **State Management**: Redux Toolkit
-- **Audio/Video**: WebRTC, MediaRecorder API
-- **Real-time**: WebSocket connections
+- **Interface**: HTML5/CSS3/JavaScript (conversation-style UI)
+- **Real-time**: WebSocket connections for live analysis
+- **Audio/Video**: WebRTC, MediaRecorder API (planned)
+- **Responsive**: Mobile-first design
 
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
-- **CI/CD**: GitHub Actions
-- **Monitoring**: Application performance monitoring
-- **Cloud**: AWS/Azure/GCP deployment ready
+- **Development**: Python virtual environment
+- **Deployment**: Production-ready FastAPI server
 
 ## Quick Start
 
